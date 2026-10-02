@@ -10,17 +10,28 @@ export type ContentBlock =
 
 const HEADING_SELECTOR = "h1, h2, h3, h4, h5, h6";
 
+export type BlockPlacement = "break" | "stack" | "flow";
+
+export function blockPlacements(
+	blocks: readonly ContentBlock[],
+	breakOn: HeadingFlags
+): BlockPlacement[] {
+	return blocks.map((block, index) => {
+		if (block.kind !== "heading") return "flow";
+		const previous = index > 0 ? blocks[index - 1] : undefined;
+		if (previous?.kind === "heading") return "stack";
+		if (index > 0 && breakOn[block.level]) return "break";
+		return "flow";
+	});
+}
+
 export function blocksThatBreak(
 	blocks: readonly ContentBlock[],
 	breakOn: HeadingFlags
 ): number[] {
 	const indexes: number[] = [];
-	let preceded = false;
-	blocks.forEach((block, index) => {
-		if (block.kind === "heading" && breakOn[block.level] && preceded) {
-			indexes.push(index);
-		}
-		preceded = true;
+	blockPlacements(blocks, breakOn).forEach((placement, index) => {
+		if (placement === "break") indexes.push(index);
 	});
 	return indexes;
 }
@@ -42,19 +53,22 @@ export function applyHeadingPageBreaks(
 	breakOn: HeadingFlags
 ): void {
 	const blocks = collectBlocks(root);
-	const breaks = new Set(blocksThatBreak(blocks, breakOn));
+	const placements = blockPlacements(blocks, breakOn);
 	blocks.forEach((block, index) => {
 		if (block.kind !== "heading") return;
-		setPageBreak(block.el, breaks.has(index));
+		setPageBreak(block.el, placements[index] ?? "flow");
 	});
 }
 
-function setPageBreak(el: HTMLElement, on: boolean): void {
-	el.classList.toggle("page-pdf-break", on);
-	el.style.breakBefore = on ? "page" : "";
-	el.style.pageBreakBefore = on ? "always" : "";
-	el.style.breakAfter = on ? "avoid" : "";
-	el.style.pageBreakAfter = on ? "avoid" : "";
+function setPageBreak(el: HTMLElement, placement: BlockPlacement): void {
+	const broke = placement === "break";
+	const stacked = placement === "stack";
+	el.classList.toggle("page-pdf-break", broke);
+	el.classList.toggle("page-pdf-stacked", stacked);
+	el.style.breakBefore = broke ? "page" : "auto";
+	el.style.pageBreakBefore = broke ? "always" : "auto";
+	el.style.breakAfter = "avoid";
+	el.style.pageBreakAfter = "avoid";
 }
 
 function collectBlocks(root: HTMLElement): DomBlock[] {

@@ -16,6 +16,8 @@ export const MAX_SCALE_PERCENT = 100;
 
 export interface PdfSettings {
 	includeName: boolean;
+	frontPage: boolean;
+	toc: boolean;
 	pageSize: PageSize;
 	landscape: boolean;
 	margin: MarginChoice;
@@ -35,6 +37,8 @@ export const DEFAULT_BREAKS: HeadingFlags = {
 
 export const DEFAULT_SETTINGS: PdfSettings = {
 	includeName: false,
+	frontPage: true,
+	toc: true,
 	pageSize: "A4",
 	landscape: false,
 	margin: "minimal",
@@ -92,6 +96,8 @@ export function sanitizeSettings(raw: unknown): SanitizedSettings {
 	if (typeof stored.includeName === "boolean") {
 		settings.includeName = stored.includeName;
 	}
+	if (typeof stored.frontPage === "boolean") settings.frontPage = stored.frontPage;
+	if (typeof stored.toc === "boolean") settings.toc = stored.toc;
 	if (isPageSize(stored.pageSize)) settings.pageSize = stored.pageSize;
 	if (typeof stored.landscape === "boolean") settings.landscape = stored.landscape;
 	if (isMargin(stored.margin)) settings.margin = stored.margin;

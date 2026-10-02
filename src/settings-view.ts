@@ -21,7 +21,28 @@ export function renderPdfSettings(
 	onChange: () => void
 ): void {
 	new Setting(container)
+		.setName("Front page")
+		.setDesc("The file name, centered in the middle of the first page. No properties or other metadata.")
+		.addToggle((toggle) =>
+			toggle.setValue(settings.frontPage).onChange((value) => {
+				settings.frontPage = value;
+				onChange();
+			})
+		);
+
+	new Setting(container)
+		.setName("Table of contents")
+		.setDesc("A contents page after the front page. Each line is a [[#heading]] link.")
+		.addToggle((toggle) =>
+			toggle.setValue(settings.toc).onChange((value) => {
+				settings.toc = value;
+				onChange();
+			})
+		);
+
+	new Setting(container)
 		.setName("Include file name as title")
+		.setDesc("Adds the file name above the note when the front page is off.")
 		.addToggle((toggle) =>
 			toggle.setValue(settings.includeName).onChange((value) => {
 				settings.includeName = value;
@@ -93,7 +114,7 @@ export function renderPdfSettings(
 
 	new Setting(container)
 		.setName("New page before")
-		.setDesc("A checked level starts on a new page. The first block stays on page 1.")
+		.setDesc("A checked level starts on a new page. Headings with nothing between them stay together. The first block stays on page 1.")
 		.setHeading();
 
 	for (const level of HEADING_LEVELS) {

@@ -11,7 +11,12 @@ Defaults:
 - Minimal margin
 - Full size (no downscale)
 
-Each of H1, H2, and H3 starts a new page. H4, H5, and H6 stay with the text above them until you turn those levels on. The first block stays on page 1, so the export does not open with a blank page.
+Each of H1, H2, and H3 starts a new page. H4, H5, and H6 stay with the text above them until you turn those levels on. The first block stays on page 1, so the export does not open with a blank page. When one heading follows another with nothing between them, they stay on the same page.
+
+Two more switches:
+
+- **Front page.** The file name, centered in the middle of the first page. Properties and other metadata stay off that page.
+- **Table of contents.** The next page lists every heading as a `[[#Heading]]` link. The links are real text in the PDF, so they show in Preview and in browser PDF viewers. The same heading links inside the note jump to those headings.
 
 You can still change the page size, landscape, margin, and downscale, and you can set the body font size. Those are the same page controls as Obsidian's Export to PDF, plus the heading breaks and the font size.
 

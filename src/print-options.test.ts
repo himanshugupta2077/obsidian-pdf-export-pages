@@ -15,6 +15,7 @@ describe("buildPrintRequest", () => {
 		assert.equal(request.scale, 1);
 		assert.equal(request.printBackground, true);
 		assert.equal(request.preferCSSPageSize, false);
+		assert.equal(request.generateDocumentOutline, true);
 	});
 
 	it("uses Obsidian's margin codes for default and none", () => {

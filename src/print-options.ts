@@ -15,6 +15,7 @@ export interface PrintToPdfRequest {
 	scale: number;
 	printBackground: true;
 	preferCSSPageSize: false;
+	generateDocumentOutline: true;
 }
 
 export function marginsTypeFor(margin: MarginChoice): 0 | 1 | 2 {
@@ -37,6 +38,7 @@ export function buildPrintRequest(
 		scale: clampScalePercent(settings.scalePercent) / 100,
 		printBackground: true,
 		preferCSSPageSize: false,
+		generateDocumentOutline: true,
 	};
 	if (marginsType === 1 || marginsType === 2) {
 		request.margins = { top: 0, left: 0, bottom: 0, right: 0 };

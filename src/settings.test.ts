@@ -16,6 +16,8 @@ describe("sanitizeSettings", () => {
 		assert.equal(settings.scalePercent, 100);
 		assert.equal(settings.fontSize, 16);
 		assert.equal(settings.includeName, false);
+		assert.equal(settings.frontPage, true);
+		assert.equal(settings.toc, true);
 		assert.deepEqual(settings.breakOn, {
 			1: true,
 			2: true,
@@ -34,6 +36,8 @@ describe("sanitizeSettings", () => {
 			scalePercent: 250,
 			fontSize: 20.4,
 			includeName: true,
+			frontPage: false,
+			toc: false,
 			breakOn: { 1: false, 4: true, 9: true },
 		});
 		assert.equal(fontSizeSet, true);
@@ -43,6 +47,8 @@ describe("sanitizeSettings", () => {
 		assert.equal(settings.scalePercent, 100);
 		assert.equal(settings.fontSize, 20);
 		assert.equal(settings.includeName, true);
+		assert.equal(settings.frontPage, false);
+		assert.equal(settings.toc, false);
 		assert.equal(settings.breakOn[1], false);
 		assert.equal(settings.breakOn[2], true);
 		assert.equal(settings.breakOn[4], true);

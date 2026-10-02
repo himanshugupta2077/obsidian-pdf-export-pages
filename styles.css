@@ -42,4 +42,64 @@ body > .page-pdf-print {
 		break-after: avoid;
 		page-break-after: avoid;
 	}
+
+	.page-pdf-print .page-pdf-stacked {
+		margin-top: 0.2em !important;
+		break-before: auto !important;
+		page-break-before: auto !important;
+		break-after: avoid;
+		page-break-after: avoid;
+	}
+
+	.page-pdf-print .metadata-container {
+		display: none !important;
+	}
+
+	.page-pdf-print .page-pdf-front {
+		display: flex !important;
+		align-items: center !important;
+		justify-content: center !important;
+		text-align: center !important;
+		height: 90vh;
+		break-after: page;
+		page-break-after: always;
+		break-before: auto;
+		page-break-before: auto;
+		color: #111111 !important;
+		visibility: visible !important;
+	}
+
+	.page-pdf-print .page-pdf-front-title {
+		max-width: 80%;
+		color: #111111 !important;
+		font-size: 2em;
+		font-weight: 600;
+		line-height: 1.3;
+	}
+
+	.page-pdf-print .page-pdf-toc {
+		display: block !important;
+		visibility: visible !important;
+		color: #111111 !important;
+		break-after: page;
+		page-break-after: always;
+		break-before: auto;
+		page-break-before: auto;
+	}
+
+	.page-pdf-print .page-pdf-toc-title {
+		color: #111111 !important;
+		text-align: center;
+	}
+
+	.page-pdf-print .page-pdf-toc-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.page-pdf-print .page-pdf-toc-link {
+		color: #111111 !important;
+		text-decoration: underline;
+	}
 }
