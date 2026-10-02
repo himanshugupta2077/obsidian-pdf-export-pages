@@ -32,7 +32,9 @@ export function renderPdfSettings(
 
 	new Setting(container)
 		.setName("Table of contents")
-		.setDesc("A contents page after the front page. Each line is the heading name, indented by level.")
+		.setDesc(
+			"A contents page after the front page. Each line is the heading name, indented by level, and opens that heading. macOS Preview also lists the headings in its sidebar."
+		)
 		.addToggle((toggle) =>
 			toggle.setValue(settings.toc).onChange((value) => {
 				settings.toc = value;

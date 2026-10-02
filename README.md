@@ -16,7 +16,7 @@ Each of H1, H2, and H3 starts a new page. H4, H5, and H6 stay with the text abov
 Two more switches:
 
 - **Front page.** The file name, centered in the middle of the first page. Properties and other metadata stay off that page.
-- **Table of contents.** The next page lists every heading by name, indented by level. Each line is a link to that heading. The same heading links inside the note jump to those headings.
+- **Table of contents.** The next page lists every heading by name, indented by level. Each line opens that heading. macOS Preview's sidebar lists the same headings. Links inside the note that point at a heading jump there too.
 - **Live preview.** The export window has three columns: the pages on the left, the settings in the middle, and every heading on the right. Turn a heading on to start it on a new page. The preview updates as you change a heading or any other setting.
 
 Minimal margin keeps a real top inset (0.6 inch) so a heading is not flush with the edge of the paper. None still has no margin.

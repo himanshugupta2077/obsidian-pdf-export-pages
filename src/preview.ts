@@ -234,6 +234,15 @@ function paintToc(
 			pageNav.style.pageBreakAfter = "auto";
 			pageNav.style.height = "auto";
 			if (pageIndex > 0) pageNav.querySelector(".page-pdf-toc-title")?.remove();
+			for (const link of Array.from(pageNav.querySelectorAll("a.page-pdf-toc-link"))) {
+				link.addEventListener("click", (event) => {
+					event.preventDefault();
+					const href = link.getAttribute("href") ?? "";
+					const id = href.startsWith("#") ? href.slice(1) : "";
+					if (!id) return;
+					flow.ownerDocument.getElementById(id)?.scrollIntoView({ block: "nearest" });
+				});
+			}
 		}, unscaled);
 	});
 	probe.detach();

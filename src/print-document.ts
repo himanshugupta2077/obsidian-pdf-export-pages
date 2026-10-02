@@ -57,9 +57,8 @@ export function appendToc(slot: HTMLElement, entries: readonly TocEntry[]): HTML
 		});
 		link.setAttribute("href", `#${entry.id}`);
 		link.style.color = "#111111";
-		link.style.textDecoration = "none";
+		link.style.textDecoration = "underline";
 		link.style.fontWeight = entry.level === 1 ? "600" : "400";
-		link.style.display = "block";
 		link.style.lineHeight = "1.35";
 	}
 	return nav;
@@ -71,23 +70,33 @@ export function stampHeadings(root: HTMLElement): TocEntry[] {
 			node instanceof HTMLElement && !node.closest(".metadata-container")
 	);
 	const headings: { level: HeadingLevel; text: string }[] = [];
-	for (const node of nodes) {
-		const level = headingLevel(node);
-		const text = (node.textContent ?? "").replace(/\s+/g, " ").trim();
-		if (level && text) headings.push({ level, text });
-	}
-	const entries = buildToc(headings);
-	let index = 0;
+	const stamped: HTMLElement[] = [];
 	for (const node of nodes) {
 		const level = headingLevel(node);
 		const text = (node.textContent ?? "").replace(/\s+/g, " ").trim();
 		if (!level || !text) continue;
-		const entry = entries[index];
-		index += 1;
-		if (!entry) continue;
-		node.id = entry.id;
+		headings.push({ level, text });
+		stamped.push(node);
 	}
+	const entries = buildToc(headings);
+	entries.forEach((entry, index) => {
+		const node = stamped[index];
+		if (node) placeHeadingDestination(node, entry.id);
+	});
 	return entries;
+}
+
+/**
+ * The named destination is the heading text. Putting the id on the heading
+ * itself parks it on the page-break box, up in the margin.
+ */
+function placeHeadingDestination(heading: HTMLElement, id: string): void {
+	heading.removeAttribute("id");
+	const mark = heading.ownerDocument.createElement("span");
+	mark.id = id;
+	mark.className = "page-pdf-dest";
+	while (heading.firstChild) mark.appendChild(heading.firstChild);
+	heading.appendChild(mark);
 }
 
 export function retargetInternalLinks(root: HTMLElement, entries: readonly TocEntry[]): void {

@@ -14,7 +14,7 @@ export interface InchMargins {
 
 export interface PrintToPdfRequest {
 	filepath: string;
-	open: true;
+	open: boolean;
 	pageSize: PageSize;
 	landscape: boolean;
 	marginsType: 0 | 1 | 2;
@@ -22,6 +22,11 @@ export interface PrintToPdfRequest {
 	scale: number;
 	printBackground: true;
 	preferCSSPageSize: false;
+	/**
+	 * Chromium only embeds the heading outline when tagging is on.
+	 * macOS Preview's sidebar reads that outline.
+	 */
+	generateTaggedPDF: true;
 	generateDocumentOutline: true;
 }
 
@@ -80,6 +85,7 @@ export function buildPrintRequest(
 		scale: clampScalePercent(settings.scalePercent) / 100,
 		printBackground: true,
 		preferCSSPageSize: false,
+		generateTaggedPDF: true,
 		generateDocumentOutline: true,
 	};
 }

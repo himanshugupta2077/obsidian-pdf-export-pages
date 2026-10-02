@@ -101,7 +101,7 @@ body > .page-pdf-print {
 
 	.page-pdf-print .page-pdf-toc-link {
 		color: #111111 !important;
-		text-decoration: none;
+		text-decoration: underline;
 	}
 
 	.page-pdf-print .page-pdf-toc-title {
@@ -223,7 +223,7 @@ body > .page-pdf-print {
 
 .page-pdf-sheet .page-pdf-toc-link {
 	color: #111111 !important;
-	text-decoration: none !important;
+	text-decoration: underline;
 }
 
 .page-pdf-sheet-num {

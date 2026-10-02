@@ -1,4 +1,5 @@
 import { Component, MarkdownRenderer, TFile, type App } from "obsidian";
+import { enablePreviewNavigation } from "./pdf-nav.ts";
 import { finishNote, waitForImages } from "./print-document.ts";
 import { buildPrintRequest, type PrintToPdfRequest } from "./print-options.ts";
 import { type PdfSettings } from "./settings.ts";
@@ -12,6 +13,9 @@ interface ElectronLike {
 	ipcRenderer?: {
 		send(channel: string, payload: unknown): void;
 		once(channel: string, listener: () => void): void;
+	};
+	shell?: {
+		openPath(path: string): Promise<string>;
 	};
 	remote?: {
 		dialog?: {
@@ -79,13 +83,35 @@ export async function printMarkdownFile(
 		await waitForImages(preview);
 		if (document.fonts?.ready) await document.fonts.ready;
 		await sleep(200);
-		await withLightPrintTheme(() =>
-			sendPrint(electron, buildPrintRequest(settings, filepath))
-		);
+		const hiddenIds = hideForeignHeadingIds(host);
+		try {
+			const request = buildPrintRequest(settings, filepath);
+			await withLightPrintTheme(() => sendPrint(electron, { ...request, open: false }));
+		} finally {
+			restoreHeadingIds(hiddenIds);
+		}
 		assertPdfWritten(filepath);
+		makePreviewNavigable(filepath);
+		openPdf(filepath);
 	} finally {
 		component.unload();
 		host.detach();
+	}
+}
+
+function hideForeignHeadingIds(host: HTMLElement): { el: HTMLElement; id: string }[] {
+	const hidden: { el: HTMLElement; id: string }[] = [];
+	for (const node of Array.from(document.querySelectorAll("[id^='pdf-h-']"))) {
+		if (!(node instanceof HTMLElement) || host.contains(node)) continue;
+		hidden.push({ el: node, id: node.id });
+		node.removeAttribute("id");
+	}
+	return hidden;
+}
+
+function restoreHeadingIds(hidden: readonly { el: HTMLElement; id: string }[]): void {
+	for (const item of hidden) {
+		if (!item.el.id) item.el.id = item.id;
 	}
 }
 
@@ -139,22 +165,55 @@ function sleep(ms: number): Promise<void> {
 }
 
 function assertPdfWritten(filepath: string): void {
-	const req = (window as Window & { require?: (id: string) => NodeFs }).require;
-	if (!req) return;
-	let fs: NodeFs;
+	const fs = loadFs();
+	if (!fs) return;
+	if (!fs.existsSync(filepath) || fs.statSync(filepath).size < 5) {
+		throw new Error("Failed to save PDF.");
+	}
+}
+
+function makePreviewNavigable(filepath: string): void {
 	try {
-		fs = req("fs");
+		const fs = loadFs();
+		if (!fs?.readFileSync || !fs.writeFileSync || !fs.renameSync) return;
+		const original = fs.readFileSync(filepath);
+		const patched = enablePreviewNavigation(original);
+		if (patched === original) return;
+		const temporary = `${filepath}.writing`;
+		fs.writeFileSync(temporary, patched);
+		fs.renameSync(temporary, filepath);
 	} catch {
 		return;
 	}
-	if (!fs.existsSync(filepath) || fs.statSync(filepath).size < 5) {
-		throw new Error("Failed to save PDF.");
+}
+
+function openPdf(filepath: string): void {
+	const req = (window as Window & { require?: (id: string) => ElectronLike }).require;
+	if (!req) return;
+	try {
+		const electron = req("electron");
+		void electron.shell?.openPath(filepath);
+	} catch {
+		return;
+	}
+}
+
+function loadFs(): NodeFs | null {
+	const req = (window as Window & { require?: (id: string) => NodeFs }).require;
+	if (!req) return null;
+	try {
+		return req("fs");
+	} catch {
+		return null;
 	}
 }
 
 interface NodeFs {
 	existsSync(path: string): boolean;
 	statSync(path: string): { size: number };
+	readFileSync?(path: string): Uint8Array;
+	writeFileSync?(path: string, data: Uint8Array): void;
+	renameSync?(from: string, to: string): void;
 }
 
 function loadElectron(): ElectronLike | null {
