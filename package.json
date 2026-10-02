@@ -1,0 +1,30 @@
+{
+	"name": "obsidian-pdf-export-pages",
+	"version": "1.0.0",
+	"description": "Export an Obsidian note to PDF and start a new page at the heading levels you choose.",
+	"main": "main.js",
+	"type": "module",
+	"scripts": {
+		"dev": "node esbuild.config.mjs",
+		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"test": "node --experimental-strip-types --test src/settings.test.ts src/print-options.test.ts src/page-breaks.test.ts"
+	},
+	"keywords": [
+		"obsidian",
+		"plugin",
+		"pdf",
+		"export"
+	],
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/himanshugupta2077/obsidian-pdf-export-pages.git"
+	},
+	"devDependencies": {
+		"@types/node": "^16.11.6",
+		"esbuild": "0.25.5",
+		"obsidian": "latest",
+		"tslib": "2.4.0",
+		"typescript": "^5.8.3"
+	}
+}

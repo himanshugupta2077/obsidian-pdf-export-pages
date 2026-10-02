@@ -1,0 +1,10 @@
+{
+	"id": "pdf-export-pages",
+	"name": "PDF export pages",
+	"version": "1.0.0",
+	"minAppVersion": "1.4.0",
+	"description": "Export a note to PDF the way Obsidian does, and start a new page at the heading levels you pick.",
+	"author": "Himanshu Gupta",
+	"authorUrl": "https://github.com/himanshugupta2077",
+	"isDesktopOnly": true
+}

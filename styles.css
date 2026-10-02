@@ -1,0 +1,45 @@
+body > .page-pdf-print {
+	position: fixed;
+	left: -100000px;
+	top: 0;
+	width: 720px;
+	pointer-events: none;
+}
+
+.page-pdf-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: var(--size-4-2);
+	margin-top: var(--size-4-3);
+}
+
+@media print {
+	body > .page-pdf-print.print {
+		position: static !important;
+		left: auto !important;
+		top: auto !important;
+		width: auto !important;
+		height: auto !important;
+		max-height: none !important;
+		overflow: visible !important;
+		opacity: 1 !important;
+		pointer-events: auto !important;
+		transform: none !important;
+	}
+
+	.page-pdf-print,
+	.page-pdf-print .markdown-preview-view {
+		background: white !important;
+		font-size: var(--page-pdf-font-size);
+		--font-text-size: var(--page-pdf-font-size);
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
+	}
+
+	.page-pdf-print .page-pdf-break {
+		break-before: page;
+		page-break-before: always;
+		break-after: avoid;
+		page-break-after: avoid;
+	}
+}
