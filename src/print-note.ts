@@ -1,8 +1,7 @@
 import { Component, MarkdownRenderer, TFile, type App } from "obsidian";
-import { applyHeadingPageBreaks } from "./page-breaks.ts";
+import { finishNote, waitForImages } from "./print-document.ts";
 import { buildPrintRequest, type PrintToPdfRequest } from "./print-options.ts";
-import { isHeadingLevel, type HeadingLevel, type PdfSettings } from "./settings.ts";
-import { buildToc, headingTarget, type TocEntry } from "./toc.ts";
+import { type PdfSettings } from "./settings.ts";
 
 interface SaveDialogResult {
 	canceled?: boolean;
@@ -48,7 +47,8 @@ export async function printMarkdownFile(
 	app: App,
 	file: TFile,
 	settings: PdfSettings,
-	filepath: string
+	filepath: string,
+	headingBreaks?: ReadonlyMap<number, boolean>
 ): Promise<void> {
 	const electron = loadElectron();
 	if (!electron?.ipcRenderer) {
@@ -72,20 +72,10 @@ export async function printMarkdownFile(
 			"show-properties",
 			vaultConfig(app, "propertiesInDocument") !== "hidden"
 		);
-		if (settings.frontPage) appendFrontPage(preview, file.basename);
-		const tocSlot = preview.createDiv({ cls: "page-pdf-toc-slot" });
 		const rendered = preview.createDiv({ cls: "page-pdf-body" });
-		if (settings.includeName && !settings.frontPage) {
-			rendered.createEl("h1", { text: file.basename, cls: "page-pdf-title" });
-		}
 		const markdown = await app.vault.cachedRead(file);
 		await MarkdownRenderer.render(app, markdown, rendered, file.path, component);
-		hideMetadata(rendered);
-		const entries = stampHeadings(rendered);
-		if (settings.toc && entries.length > 0) appendToc(tocSlot, entries);
-		else tocSlot.detach();
-		retargetInternalLinks(rendered, entries);
-		applyHeadingPageBreaks(rendered, settings.breakOn);
+		finishNote(preview, rendered, file.basename, settings, headingBreaks);
 		await waitForImages(preview);
 		if (document.fonts?.ready) await document.fonts.ready;
 		await sleep(200);
@@ -96,105 +86,6 @@ export async function printMarkdownFile(
 	} finally {
 		component.unload();
 		host.detach();
-	}
-}
-
-function appendFrontPage(parent: HTMLElement, title: string): void {
-	const page = parent.createDiv({ cls: "page-pdf-front" });
-	page.style.breakAfter = "page";
-	page.style.pageBreakAfter = "always";
-	page.style.breakBefore = "auto";
-	page.style.pageBreakBefore = "auto";
-	page.style.height = "90vh";
-	page.style.display = "flex";
-	page.style.alignItems = "center";
-	page.style.justifyContent = "center";
-	page.style.textAlign = "center";
-	page.style.color = "#111111";
-	const name = page.createDiv({ cls: "page-pdf-front-title", text: title });
-	name.style.fontSize = "2em";
-	name.style.fontWeight = "600";
-	name.style.lineHeight = "1.3";
-	name.style.maxWidth = "80%";
-	name.style.color = "#111111";
-}
-
-function appendToc(slot: HTMLElement, entries: readonly TocEntry[]): void {
-	const nav = slot.createEl("nav", { cls: "page-pdf-toc" });
-	nav.style.breakAfter = "page";
-	nav.style.pageBreakAfter = "always";
-	nav.style.breakBefore = "auto";
-	nav.style.pageBreakBefore = "auto";
-	nav.style.display = "block";
-	nav.style.visibility = "visible";
-	nav.style.color = "#111111";
-	const title = nav.createDiv({ cls: "page-pdf-toc-title", text: "Contents" });
-	title.style.fontSize = "1.5em";
-	title.style.fontWeight = "600";
-	title.style.textAlign = "center";
-	title.style.margin = "0 0 1.2em";
-	title.style.color = "#111111";
-	const list = nav.createEl("ul", { cls: "page-pdf-toc-list" });
-	list.style.listStyle = "none";
-	list.style.margin = "0";
-	list.style.padding = "0";
-	for (const entry of entries) {
-		const item = list.createEl("li", { cls: "page-pdf-toc-item" });
-		item.style.margin = "0.35em 0";
-		item.style.paddingLeft = `${(entry.level - 1) * 1.15}em`;
-		item.style.breakInside = "avoid";
-		item.style.pageBreakInside = "avoid";
-		const link = item.createEl("a", {
-			cls: "page-pdf-toc-link",
-			text: entry.label,
-		});
-		link.setAttribute("href", `#${entry.id}`);
-		link.style.color = "#111111";
-		link.style.textDecoration = "underline";
-	}
-}
-
-function stampHeadings(root: HTMLElement): TocEntry[] {
-	const nodes = Array.from(root.querySelectorAll("h1, h2, h3, h4, h5, h6")).filter(
-		(node): node is HTMLElement =>
-			node instanceof HTMLElement && !node.closest(".metadata-container")
-	);
-	const headings: { level: HeadingLevel; text: string }[] = [];
-	for (const node of nodes) {
-		const level = headingLevel(node);
-		const text = (node.textContent ?? "").replace(/\s+/g, " ").trim();
-		if (level && text) headings.push({ level, text });
-	}
-	const entries = buildToc(headings);
-	let index = 0;
-	for (const node of nodes) {
-		const level = headingLevel(node);
-		const text = (node.textContent ?? "").replace(/\s+/g, " ").trim();
-		if (!level || !text) continue;
-		const entry = entries[index];
-		index += 1;
-		if (!entry) continue;
-		node.id = entry.id;
-	}
-	return entries;
-}
-
-function headingLevel(node: HTMLElement): HeadingLevel | null {
-	const level = Number(node.tagName.slice(1));
-	return isHeadingLevel(level) ? level : null;
-}
-
-function retargetInternalLinks(root: HTMLElement, entries: readonly TocEntry[]): void {
-	for (const link of Array.from(root.querySelectorAll("a.internal-link"))) {
-		const target = headingTarget(entries, link.getAttribute("data-href") ?? "");
-		if (target) link.setAttribute("href", target);
-		else link.removeAttribute("href");
-	}
-}
-
-function hideMetadata(root: HTMLElement): void {
-	for (const node of Array.from(root.querySelectorAll(".metadata-container"))) {
-		if (node instanceof HTMLElement) node.style.display = "none";
 	}
 }
 
@@ -239,21 +130,6 @@ function sendPrint(electron: ElectronLike, request: PrintToPdfRequest): Promise<
 		});
 		ipc.send(PRINT_CHANNEL, request);
 	});
-}
-
-function waitForImages(root: HTMLElement): Promise<void> {
-	const pending = Array.from(root.querySelectorAll("img")).filter((img) => !img.complete);
-	if (pending.length === 0) return Promise.resolve();
-	return Promise.all(
-		pending.map(
-			(img) =>
-				new Promise<void>((resolve) => {
-					const done = () => resolve();
-					img.addEventListener("load", done, { once: true });
-					img.addEventListener("error", done, { once: true });
-				})
-		)
-	).then(() => undefined);
 }
 
 function sleep(ms: number): Promise<void> {

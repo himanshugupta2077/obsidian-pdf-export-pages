@@ -16,7 +16,10 @@ Each of H1, H2, and H3 starts a new page. H4, H5, and H6 stay with the text abov
 Two more switches:
 
 - **Front page.** The file name, centered in the middle of the first page. Properties and other metadata stay off that page.
-- **Table of contents.** The next page lists every heading as a `[[#Heading]]` link. The links are real text in the PDF, so they show in Preview and in browser PDF viewers. The same heading links inside the note jump to those headings.
+- **Table of contents.** The next page lists every heading by name, indented by level. Each line is a link to that heading. The same heading links inside the note jump to those headings.
+- **Live preview.** The export window has three columns: the pages on the left, the settings in the middle, and every heading on the right. Turn a heading on to start it on a new page. The preview updates as you change a heading or any other setting.
+
+Minimal margin keeps a real top inset (0.6 inch) so a heading is not flush with the edge of the paper. None still has no margin.
 
 You can still change the page size, landscape, margin, and downscale, and you can set the body font size. Those are the same page controls as Obsidian's Export to PDF, plus the heading breaks and the font size.
 
@@ -24,7 +27,7 @@ You can still change the page size, landscape, margin, and downscale, and you ca
 
 Open a note, then run **Export current note to PDF** from the command palette. The same action is **Export PDF pages...** in the note's More options menu and in the file explorer's right-click menu.
 
-Pick the heading levels and the font size, then save the PDF. The app opens the file when the export finishes.
+Check the preview, turn page breaks on or off for individual headings, then save the PDF. The app opens the file when the export finishes.
 
 ## Install
 

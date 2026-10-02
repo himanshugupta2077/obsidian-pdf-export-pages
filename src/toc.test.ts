@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { buildToc, headingTarget, wikilinkLabel } from "./toc.ts";
+import { buildToc, headingTarget } from "./toc.ts";
 
 describe("buildToc", () => {
-	it("builds [[#heading]] links in document order", () => {
+	it("lists heading names in document order", () => {
 		const entries = buildToc([
 			{ level: 1, text: "Overview" },
 			{ level: 2, text: "  Setup steps  " },
@@ -11,8 +11,12 @@ describe("buildToc", () => {
 			{ level: 1, text: "Overview" },
 		]);
 		assert.deepEqual(
-			entries.map((entry) => entry.label),
-			["[[#Overview]]", "[[#Setup steps]]", "[[#Overview]]"]
+			entries.map((entry) => entry.text),
+			["Overview", "Setup steps", "Overview"]
+		);
+		assert.equal(
+			entries.some((entry) => entry.text.includes("[[#")),
+			false
 		);
 		assert.deepEqual(
 			entries.map((entry) => entry.id),
@@ -22,7 +26,6 @@ describe("buildToc", () => {
 			entries.map((entry) => entry.level),
 			[1, 2, 1]
 		);
-		assert.equal(wikilinkLabel("Heading here"), "[[#Heading here]]");
 	});
 });
 

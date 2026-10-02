@@ -32,7 +32,7 @@ export function renderPdfSettings(
 
 	new Setting(container)
 		.setName("Table of contents")
-		.setDesc("A contents page after the front page. Each line is a [[#heading]] link.")
+		.setDesc("A contents page after the front page. Each line is the heading name, indented by level.")
 		.addToggle((toggle) =>
 			toggle.setValue(settings.toc).onChange((value) => {
 				settings.toc = value;
@@ -70,6 +70,7 @@ export function renderPdfSettings(
 
 	new Setting(container)
 		.setName("Margin")
+		.setDesc("Minimal keeps a real top margin so text does not sit on the edge of the page.")
 		.addDropdown((dropdown) => {
 			dropdown
 				.addOption("default", MARGIN_LABELS.default)
@@ -114,7 +115,7 @@ export function renderPdfSettings(
 
 	new Setting(container)
 		.setName("New page before")
-		.setDesc("A checked level starts on a new page. Headings with nothing between them stay together. The first block stays on page 1.")
+		.setDesc("A checked level starts on a new page. In the export window, each heading has its own switch. The first block stays on page 1. A heading that follows another heading stays with it until you turn that heading on.")
 		.setHeading();
 
 	for (const level of HEADING_LEVELS) {

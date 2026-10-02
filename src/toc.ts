@@ -9,11 +9,6 @@ export interface TocEntry {
 	level: HeadingLevel;
 	text: string;
 	id: string;
-	label: string;
-}
-
-export function wikilinkLabel(text: string): string {
-	return `[[#${text}]]`;
 }
 
 export function buildToc(headings: readonly TocHeading[]): TocEntry[] {
@@ -26,7 +21,6 @@ export function buildToc(headings: readonly TocHeading[]): TocEntry[] {
 			level: heading.level,
 			text,
 			id,
-			label: wikilinkLabel(text),
 		});
 	}
 	return entries;

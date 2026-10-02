@@ -3,8 +3,12 @@ import { describe, it } from "node:test";
 import { blocksThatBreak, type ContentBlock } from "./page-breaks.ts";
 import { DEFAULT_BREAKS, type HeadingFlags } from "./settings.ts";
 
-function breaks(blocks: ContentBlock[], flags: HeadingFlags = DEFAULT_BREAKS): number[] {
-	return blocksThatBreak(blocks, flags);
+function breaks(
+	blocks: ContentBlock[],
+	flags: HeadingFlags = DEFAULT_BREAKS,
+	overrides?: ReadonlyMap<number, boolean>
+): number[] {
+	return blocksThatBreak(blocks, flags, overrides);
 }
 
 describe("blocksThatBreak", () => {
@@ -58,5 +62,19 @@ describe("blocksThatBreak", () => {
 			{ kind: "heading", level: 1 },
 		];
 		assert.deepEqual(breaks(blocks), [1]);
+	});
+
+	it("turns one heading on or off without moving the others", () => {
+		const blocks: ContentBlock[] = [
+			{ kind: "heading", level: 1, headingIndex: 0 },
+			{ kind: "heading", level: 2, headingIndex: 1 },
+			{ kind: "text" },
+			{ kind: "heading", level: 2, headingIndex: 2 },
+		];
+		const overrides = new Map<number, boolean>([
+			[1, true],
+			[2, false],
+		]);
+		assert.deepEqual(breaks(blocks, DEFAULT_BREAKS, overrides), [1]);
 	});
 });

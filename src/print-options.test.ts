@@ -11,7 +11,10 @@ describe("buildPrintRequest", () => {
 		assert.equal(request.pageSize, "A4");
 		assert.equal(request.landscape, false);
 		assert.equal(request.marginsType, 2);
-		assert.deepEqual(request.margins, { top: 0, left: 0, bottom: 0, right: 0 });
+		assert.ok(request.margins.top >= 0.5);
+		assert.ok(request.margins.bottom > 0);
+		assert.ok(request.margins.left > 0);
+		assert.ok(request.margins.right > 0);
 		assert.equal(request.scale, 1);
 		assert.equal(request.printBackground, true);
 		assert.equal(request.preferCSSPageSize, false);
@@ -24,6 +27,7 @@ describe("buildPrintRequest", () => {
 			"a.pdf"
 		);
 		assert.equal(none.marginsType, 1);
+		assert.deepEqual(none.margins, { top: 0, right: 0, bottom: 0, left: 0 });
 		assert.equal(none.scale, 0.1);
 
 		const standard = buildPrintRequest(
@@ -31,7 +35,7 @@ describe("buildPrintRequest", () => {
 			"b.pdf"
 		);
 		assert.equal(standard.marginsType, 0);
-		assert.equal(standard.margins, undefined);
+		assert.deepEqual(standard.margins, { top: 0.4, right: 0.4, bottom: 0.4, left: 0.4 });
 		assert.equal(standard.landscape, true);
 		assert.equal(standard.pageSize, "Letter");
 	});
